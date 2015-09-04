@@ -1,0 +1,50 @@
+/*
++-------------------------------------------------------------------------------------------------------+
+¦ Documento 	      ¦ DDL - Lenguaje de Definición de Datos						¦
+¦---------------------+---------------------------------------------------------------------------------¦
+¦ Objetivo            ¦ Importación Masiva								¦
+¦---------------------+---------------------------------------------------------------------------------¦---------+---------+
+¦ Autor               ¦ JLM José Luis Mora Barrios		¦ Fecha	    ¦ 04-Sep-2015  		¦ Version ¦  0.1    ¦
++-------------------------------------------------------------------------------------------------------+---------+---------+
+¦ Modificación        ¦              				¦ Fecha	    ¦ 				¦ Version ¦         ¦
++-------------------------------------------------------------------------------------------------------+---------+---------+
+¦                                      D E S C R I P C I Ó N                                         	¦
+¦													¦
+¦ + Estructura para la parametrización necesaria para realizar importaciones de archivos XLS y TXT	¦
+¦													¦
++-------------------------------------------------------------------------------------------------------+
+*/
+
+-- sys_status_general
+
+CREATE TABLE SYS_STG(
+STA_CVE 	SMALLINT 	NOT NULL,
+STA_NOM 	VARCHAR(50) 	NOT NULL,
+CONSTRAINT 	PK_sys_status_general 
+PRIMARY 	KEY(STA_CVE)
+);
+
+LABEL ON TABLE SYS_STG IS 'ESTATUS DE PROCESO DE IMPORTACION MASIVA';
+
+LABEL ON COLUMN SYS_STG(
+STA_CVE 	IS 		'IDENTIFICADOR'
+STA_NOM 	IS 		'NOMBRE'
+);
+
+-- cat_negocios
+
+
+
+-- cat_tipos_campos
+
+-- cat_metodos_validaciones
+
+-- cat_layout
+
+-- cat_layout_campo
+
+-- cat_layout_mapeo
+
+-- tra_bitacora_importaciones
+
+-- tmp_importaciones
