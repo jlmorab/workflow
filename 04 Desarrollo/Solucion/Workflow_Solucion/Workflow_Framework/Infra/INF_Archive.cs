@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Workflow.Framework.Infra
 {
@@ -31,6 +32,48 @@ namespace Workflow.Framework.Infra
 
         #region Propiedades
 
+        public string NombreCompleto 
+        {
+            get { return strNombreCompleto; }
+            set { strNombreCompleto = value; } 
+        }
+
+        public string Nombre 
+        {
+            get { return strNombre; }
+            set { strNombre = value; } 
+        }
+
+        public string Ruta 
+        {
+            get { return strRuta; }
+            set { strRuta = value; }
+        }
+
+        public string Prefijo 
+        {
+            get { return strPrefijo; }
+            set { strPrefijo = value; } 
+        }
+
+        public string Sufijo 
+        {
+            get { return strSufijo; }
+            set { strSufijo = value; }
+        }
+
+        public string Extension 
+        {
+            get { return strExtension; }
+            set { strExtension = value; }
+        }
+
+        public string Proceso 
+        {
+            get { return strProceso; }
+            set { strProceso = value; }
+        }
+
         #endregion
 
         #region Listas
@@ -42,6 +85,34 @@ namespace Workflow.Framework.Infra
         #endregion
 
         #region MetodosPrivados
+
+        private void ObtenerParametros(string Ruta)
+        {
+            // Nombre Completo
+            strNombreCompleto = Path.GetFileName(Ruta);
+
+            // Extension
+            strExtension = Path.GetExtension(Ruta);
+
+            // Nombre
+            strNombre = Path.GetFileNameWithoutExtension(Ruta);
+
+            // Ruta
+            strRuta = Path.GetDirectoryName(Ruta);
+        }
+
+        private void ObtenerPrefijos(string Archivo, int Caracteres, string Separador = null)
+        {
+            if (Separador != null)
+            {
+                int pos = Archivo.IndexOf(Separador);
+
+                if (pos - 1 >= 0)
+                {
+                    strPrefijo = Archivo.Substring(0,pos - 1);
+                }
+            }
+        }
 
         #endregion
     }
