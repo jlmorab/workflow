@@ -1,0 +1,4 @@
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Data\bin\Debug\Workflow_Data.dll
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Data\bin\Debug\Workflow_Data.pdb
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Data\obj\Debug\Workflow_Data.dll
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Data\obj\Debug\Workflow_Data.pdb

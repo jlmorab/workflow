@@ -8,6 +8,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflow_Data", "Workflow_D
 		{EB4539B4-C563-4634-9C89-4DC8EF4AD4B3} = {EB4539B4-C563-4634-9C89-4DC8EF4AD4B3}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportacionMasiva", "ImportacionMasiva\ImportacionMasiva.csproj", "{8CC1D1DD-4143-4DE6-B264-E6433DF9CDA0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{635E0069-AD69-4064-B3F2-1EB863A34293} = {635E0069-AD69-4064-B3F2-1EB863A34293}
+		{EB4539B4-C563-4634-9C89-4DC8EF4AD4B3} = {EB4539B4-C563-4634-9C89-4DC8EF4AD4B3}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +28,10 @@ Global
 		{635E0069-AD69-4064-B3F2-1EB863A34293}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{635E0069-AD69-4064-B3F2-1EB863A34293}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{635E0069-AD69-4064-B3F2-1EB863A34293}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CC1D1DD-4143-4DE6-B264-E6433DF9CDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CC1D1DD-4143-4DE6-B264-E6433DF9CDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CC1D1DD-4143-4DE6-B264-E6433DF9CDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CC1D1DD-4143-4DE6-B264-E6433DF9CDA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

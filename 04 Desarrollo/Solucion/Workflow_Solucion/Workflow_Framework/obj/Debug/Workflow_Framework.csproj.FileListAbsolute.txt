@@ -1,0 +1,5 @@
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Framework\obj\Debug\Workflow_Framework.csprojResolveAssemblyReference.cache
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Framework\bin\Debug\Workflow_Framework.dll
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Framework\bin\Debug\Workflow_Framework.pdb
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Framework\obj\Debug\Workflow_Framework.dll
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\Workflow_Framework\obj\Debug\Workflow_Framework.pdb
