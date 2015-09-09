@@ -8,8 +8,9 @@ namespace Workflow.Framework.Infra
 {
     public class INF_Archive
     {
-        private string strNombreCompleto;
+        private string strNombreOriginal;
         private string strNombre;
+        private string strSoloRuta;
         private string strRuta;
         private string strPrefijo;
         private string strSufijo;
@@ -50,8 +51,10 @@ namespace Workflow.Framework.Infra
 
         public string NombreCompleto 
         {
-            get { return strNombreCompleto; }
-            set { strNombreCompleto = value; } 
+            get 
+            {
+                return strNombre + strExtension;
+            }
         }
 
         public string Nombre 
@@ -62,11 +65,29 @@ namespace Workflow.Framework.Infra
 
         public string Ruta
         {
-            get { return strRuta; }
+            get 
+            {
+                strRuta = Path.Combine( strSoloRuta, NombreCompleto); 
+                return strRuta;
+            }
             set 
             {
                 ObtenerParametros(value, -1, -1, null);
-                strRuta = value; 
+            }
+        }
+
+        public string SoloRuta 
+        {
+            get 
+            {
+                if ((strRuta == null) || (strRuta.Trim() == ""))
+                {
+                    return "";
+                }
+                else
+                {
+                    return strSoloRuta;
+                }
             }
         }
 
@@ -144,17 +165,18 @@ namespace Workflow.Framework.Infra
 
         private void ObtenerParametros(string Ruta, int Prefijo = -1, int Sufijo = -1, string Separador = "_")
         {
-            // Nombre Completo
-            strNombreCompleto = Path.GetFileName(Ruta);
-
             // Extension
             strExtension = Path.GetExtension(Ruta);
 
             // Nombre
-            strNombre = Path.GetFileNameWithoutExtension(Ruta);
+            strNombreOriginal = Path.GetFileNameWithoutExtension(Ruta);
+            strNombre = strNombreOriginal;
+
+            // SoloRuta
+            strSoloRuta = Path.GetDirectoryName(Ruta);
 
             // Ruta
-            strRuta = Path.GetDirectoryName(Ruta);
+            strRuta = Ruta;
         }
 
         private void ObtenerPrefijos(string Archivo, int Caracteres, string Separador = "_")
