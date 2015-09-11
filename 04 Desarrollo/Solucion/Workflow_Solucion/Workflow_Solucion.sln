@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflow_Framework", "Workflow_Framework\Workflow_Framework.csproj", "{EB4539B4-C563-4634-9C89-4DC8EF4AD4B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflow_Data", "Workflow_Data\Workflow_Data.csproj", "{635E0069-AD69-4064-B3F2-1EB863A34293}"
-	ProjectSection(ProjectDependencies) = postProject
-		{EB4539B4-C563-4634-9C89-4DC8EF4AD4B3} = {EB4539B4-C563-4634-9C89-4DC8EF4AD4B3}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ejemplo", "Ejemplo\Ejemplo.csproj", "{01B50F32-3DDC-4473-8515-C4867292716D}"
 EndProject
