@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflow_Framework", "Workflow_Framework\Workflow_Framework.csproj", "{EB4539B4-C563-4634-9C89-4DC8EF4AD4B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{635E0069-AD69-4064-B3F2-1EB863A34293} = {635E0069-AD69-4064-B3F2-1EB863A34293}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflow_Data", "Workflow_Data\Workflow_Data.csproj", "{635E0069-AD69-4064-B3F2-1EB863A34293}"
 EndProject

@@ -7,5 +7,24 @@ namespace Workflow.Framework.Control.Importacion
 {
     class CL_Importacion
     {
+        #region Constructor
+
+        #endregion
+
+        #region Propiedades
+
+        #endregion
+
+        #region Listas
+
+        #endregion
+
+        #region MetodosPublicos
+
+        #endregion
+
+        #region MetodosPrivados
+
+        #endregion
     }
 }

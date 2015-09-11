@@ -102,7 +102,7 @@ namespace Workflow_Data
 
         #region Listas
 
-        enum Status
+        public enum Status
         {
             Error = -1,
             Incorrecto = 0,

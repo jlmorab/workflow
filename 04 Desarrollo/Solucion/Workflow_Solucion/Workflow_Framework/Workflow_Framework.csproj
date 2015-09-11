@@ -40,12 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Control\Importacion\CL_Importacion.cs" />
     <Compile Include="Control\Importacion\CL_ImportacionMasiva.cs" />
+    <Compile Include="Control\Importacion\CL_Layout.cs" />
+    <Compile Include="Control\Importacion\CL_Layout_Campos.cs" />
     <Compile Include="Infra\INF_Archive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Funciones\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Workflow_Data\Workflow_Data.csproj">
+      <Project>{635e0069-ad69-4064-b3f2-1eb863a34293}</Project>
+      <Name>Workflow_Data</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
