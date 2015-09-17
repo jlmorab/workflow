@@ -7,7 +7,7 @@ using Workflow_Data;
 
 namespace Workflow.Framework.Control.Importacion
 {
-    class CL_Layout_Campos
+    public class CL_Layout_Campos
     {
 
         //-------------------------------
@@ -142,7 +142,7 @@ namespace Workflow.Framework.Control.Importacion
 
         #region MetodosPrivados
 
-        public void ObtenerTipoCampo(int IdTipoCampo)
+        public void ObtenerTipoCampo(int IdTipoCampo, int Status = -1)
         {
             try
             {
@@ -151,7 +151,7 @@ namespace Workflow.Framework.Control.Importacion
                 db.Connection_Check();
 
                 System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[1];
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     parametros[i] = new System.Data.OleDb.OleDbParameter();
                 }
@@ -159,6 +159,10 @@ namespace Workflow.Framework.Control.Importacion
                 parametros[0].ParameterName = "P_ID_TIPODATO";
                 parametros[0].OleDbType = System.Data.OleDb.OleDbType.Integer;
                 parametros[0].Value = IdTipoCampo;
+
+                parametros[1].ParameterName = "P_STATUS";
+                parametros[1].OleDbType = System.Data.OleDb.OleDbType.SmallInt;
+                parametros[1].Value = Status;
 
                 dt = db.GetTable("SEL_TIPO_DATO", parametros);
 

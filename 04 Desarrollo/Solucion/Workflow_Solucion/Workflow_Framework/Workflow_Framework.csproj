@@ -40,10 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Control\Importacion\CL_Mapeo.cs" />
+    <Compile Include="Control\Importacion\Registro.cs" />
     <Compile Include="Control\Importacion\CL_Importacion.cs" />
     <Compile Include="Control\Importacion\CL_ImportacionMasiva.cs" />
     <Compile Include="Control\Importacion\CL_Layout.cs" />
     <Compile Include="Control\Importacion\CL_Layout_Campos.cs" />
+    <Compile Include="Control\Importacion\CL_MetodoValidacion.cs" />
     <Compile Include="Infra\INF_Archive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
