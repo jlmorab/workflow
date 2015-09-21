@@ -37,6 +37,15 @@ namespace Workflow.Framework.Control.Importacion
 
         #region MetodosPublicos
 
+        public void EjecucionDePrueba()
+        {
+            int IdNegocio = 1;
+            int IdLayout = 1;
+
+            CL_Layout layout = new CL_Layout(IdNegocio, IdLayout, this.db);
+            CL_Layout_Campos campos = new CL_Layout_Campos(this.db);
+        }
+
         #endregion
 
         #region MetodosPrivados

@@ -24,7 +24,31 @@ namespace Workflow.Framework.Control.Importacion
 
         #region Contructor
 
-        public CL_MetodoValidacion(dbInterface DB) { }
+        public CL_MetodoValidacion(dbInterface DB) 
+        {
+            db = DB;
+
+            // Inicializa variables
+            strNombre = string.Empty;
+            strParametros = string.Empty;
+            strEjemplo = string.Empty;
+            strRutaSistema = string.Empty;
+            strDescripcion = string.Empty;
+        }
+
+        public CL_MetodoValidacion(int IdMetodoValidacion, dbInterface DB)
+        {
+            db = DB;
+
+            // Inicializa variables
+            strNombre = string.Empty;
+            strParametros = string.Empty;
+            strEjemplo = string.Empty;
+            strRutaSistema = string.Empty;
+            strDescripcion = string.Empty;
+
+            ObtenerMetodoValidacion(IdMetodoValidacion);
+        }
 
         #endregion
 

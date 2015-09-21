@@ -11,6 +11,8 @@ namespace Workflow.Framework.Control.Importacion
     {
 
         //-------------------------------
+        private CL_MetodoValidacion validacion;
+        //-------------------------------
         private string strNombreCampoReferencia;
         private string strParametrosValidacion;
         private string strMetodoValidacion;
@@ -40,6 +42,12 @@ namespace Workflow.Framework.Control.Importacion
         #endregion
 
         #region Propiedades
+
+        public CL_MetodoValidacion Validacion 
+        {
+            get { return validacion; }
+            set { validacion = value; }
+        }
 
         public string Nombre 
         {
@@ -115,7 +123,13 @@ namespace Workflow.Framework.Control.Importacion
         public int IdMetodoValidacion
         {
             get { return intMetodoValidacion; }
-            set { intMetodoValidacion = value; }
+            set 
+            { 
+                intMetodoValidacion = value;
+
+                CL_MetodoValidacion MetodoValidacion = new CL_MetodoValidacion(intMetodoValidacion, db);
+                Validacion = MetodoValidacion;
+            }
         }
 
         public string MetodoValidacion
@@ -142,7 +156,7 @@ namespace Workflow.Framework.Control.Importacion
 
         #region MetodosPrivados
 
-        public void ObtenerTipoCampo(int IdTipoCampo, int Status = -1)
+        private void ObtenerTipoCampo(int IdTipoCampo, int Status = -1)
         {
             try
             {
