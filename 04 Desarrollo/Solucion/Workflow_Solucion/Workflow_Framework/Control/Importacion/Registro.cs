@@ -52,7 +52,7 @@ namespace Workflow.Framework.Control.Importacion
             set { intCampo = value; }
         }
 
-        public long Registro
+        public long NumeroRegistro
         {
             get { return lngRegistro; }
             set { lngRegistro = value; }

@@ -1,0 +1,68 @@
+/*
++-------------------------------------------------------------------------------------------------------+
+¦ Documento 	      ¦ MDL - Lenguaje de Modificación de Datos						¦
+¦---------------------+---------------------------------------------------------------------------------¦
+¦ Objetivo            ¦ Importación Masiva								¦
+¦---------------------+---------------------------------------------------------------------------------¦---------+---------+
+¦ Autor               ¦ JLM José Luis Mora Barrios		¦ Fecha	    ¦ 21-Sep-2015  		¦ Version ¦  0.1    ¦
++-------------------------------------------------------------------------------------------------------+---------+---------+
+¦ Modificación        ¦              				¦ Fecha	    ¦ 				¦ Version ¦         ¦
++-------------------------------------------------------------------------------------------------------+---------+---------+
+¦                                      D E S C R I P C I Ó N                                         	¦
+¦													¦
+¦ + Registros necesarios para realizar importaciones de archivos XLS y TXT				¦
+¦													¦
++-------------------------------------------------------------------------------------------------------+
+*/
+
+-- sys_status_general
+
+INSERT INTO SYS_STGE VALUES(1,'VIGENTE');
+INSERT INTO SYS_STGE VALUES(2,'SUSPENDIDO');
+INSERT INTO SYS_STGE VALUES(3,'CANCELADO');
+
+-- cat_negocios
+
+INSERT INTO CAT_NEGO VALUES(1,1,CURRENT DATE, CURRENT DATE, NULL, 'MEXICO','MEX');
+
+-- cat_tipos_campos
+
+INSERT INTO CAT_TICA VALUES ( 1, 1, CURRENT DATE, CURRENT DATE, NULL, 'BOOLEANO', NULL ) ;
+INSERT INTO CAT_TICA VALUES ( 2, 1, CURRENT DATE, CURRENT DATE, NULL, 'ENTERO CORTO', NULL ) ;
+INSERT INTO CAT_TICA VALUES ( 3, 1, CURRENT DATE, CURRENT DATE, NULL, 'ENTERO', NULL ) ;
+INSERT INTO CAT_TICA VALUES ( 4, 1, CURRENT DATE, CURRENT DATE, NULL, 'ENTERO LARGO', NULL ) ;
+INSERT INTO CAT_TICA VALUES ( 5, 1, CURRENT DATE, CURRENT DATE, NULL, 'DECIMAL', NULL ) ;
+INSERT INTO CAT_TICA VALUES ( 6, 1, CURRENT DATE, CURRENT DATE, NULL, 'TEXTO', '''' ) ;
+INSERT INTO CAT_TICA VALUES ( 7, 1, CURRENT DATE, CURRENT DATE, NULL, 'FECHA', '''' ) ;
+INSERT INTO CAT_TICA VALUES ( 8, 1, CURRENT DATE, CURRENT DATE, NULL, 'HORA', '''' ) ;
+
+-- cat_metodos_validaciones
+
+
+
+-- cat_layout
+
+INSERT INTO CAT_LAYO VALUES ( 0, 1, 1, CURRENT DATE, CURRENT DATE, NULL, 'PRUEBA', 'ARC', NULL, 'TXT', NULL, 1, 3, 'TMP_PRBA', '|', 'ARCHIVO DE PRUEBA TXT' ) ;
+
+-- cat_layout_campo
+
+INSERT INTO CAT_LACA VALUES ( 1, 1, 0, CURRENT DATE,  CURRENT DATE, NULL, 'CAMPO1', 3, 'CAMPO1', 0, 1, NULL, NULL, NULL, 0, NULL, NULL ) ;
+INSERT INTO CAT_LACA VALUES ( 2, 1, 0, CURRENT DATE,  CURRENT DATE, NULL, 'CAMPO2', 6, 'CAMPO2', 0, 2, NULL, NULL, NULL, 0, NULL, NULL ) ;
+INSERT INTO CAT_LACA VALUES ( 3, 1, 0, CURRENT DATE,  CURRENT DATE, NULL, 'CAMPO3', 3, 'CAMPO3', 0, 3, NULL, NULL, NULL, 0, NULL, NULL ) ;
+INSERT INTO CAT_LACA VALUES ( 4, 1, 0, CURRENT DATE,  CURRENT DATE, NULL, 'CAMPO4', 3, 'CAMPO4', 0, 4, NULL, NULL, NULL, 0, NULL, NULL ) ;
+INSERT INTO CAT_LACA VALUES ( 5, 1, 0, CURRENT DATE,  CURRENT DATE, NULL, 'CAMPO5', 5, 'CAMPO5', 0, 5, NULL, NULL, NULL, 0, NULL, NULL ) ;
+
+-- cat_layout_mapeo
+
+INSERT INTO CAT_LAMA VALUES ( 1, 1, 0, CURRENT DATE, CURRENT DATE, NULL, 1, 'PRB_CVE', 3 ) ;
+INSERT INTO CAT_LAMA VALUES ( 2, 1, 0, CURRENT DATE, CURRENT DATE, NULL, 2, 'PRB_NOM', 6 ) ;
+INSERT INTO CAT_LAMA VALUES ( 3, 1, 0, CURRENT DATE, CURRENT DATE, NULL, 3, 'PRB_INV', 3 ) ;
+INSERT INTO CAT_LAMA VALUES ( 4, 1, 0, CURRENT DATE, CURRENT DATE, NULL, 4, 'PRB_FLG', 3 ) ;
+INSERT INTO CAT_LAMA VALUES ( 5, 1, 0, CURRENT DATE, CURRENT DATE, NULL, 5, 'PRB_MUN', 5 ) ;
+
+-- tra_bitacora_importaciones
+
+
+
+-- tmp_importaciones
+

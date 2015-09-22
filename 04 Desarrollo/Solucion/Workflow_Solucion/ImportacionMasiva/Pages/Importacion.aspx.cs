@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Workflow.Framework.Infra;
+using Workflow.Framework.Control.Importacion;
 
 namespace ImportacionMasiva.Pages
 {
@@ -18,16 +19,14 @@ namespace ImportacionMasiva.Pages
 
         protected void btnUpload_Click(object sender, EventArgs e)
         {
-            string strFolder;
-
             // Ruta de archivos temporales en servidor
-            strFolder = Server.MapPath("../Files/tmp/");
-
-            // Recepción de archivo
-            INF_Archive arcSorce = new INF_Archive(getArchivo.PostedFile.FileName);
+            string strFolder = Server.MapPath("../Files/tmp/");
 
             if (getArchivo.Value != "")
             {
+                // Recepción de archivo
+                INF_Archive arcSorce = new INF_Archive(getArchivo.PostedFile.FileName);
+
                 // En caso de no existir el folder, lo crea
                 if (!Directory.Exists(strFolder))
                 {
@@ -51,6 +50,12 @@ namespace ImportacionMasiva.Pages
                 try
                 {
                     getArchivo.PostedFile.SaveAs(arcTarget.Ruta);
+
+                    int IdNegocio = 1;
+                    int IdLayout = 0;
+
+                    CL_ImportacionMasiva importar = new CL_ImportacionMasiva(IdNegocio, IdLayout, arcTarget);
+
                     lblUploadResult.Text = "Archivo cargado en: " + arcTarget.Ruta;
                 }
                 catch (Exception Error)

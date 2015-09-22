@@ -115,7 +115,7 @@ namespace Workflow.Framework.Control.Importacion
 
                 db.Connection_Check();
 
-                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[1];
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[2];
                 for (int i = 0; i < 2; i++)
                 {
                     parametros[i] = new System.Data.OleDb.OleDbParameter();

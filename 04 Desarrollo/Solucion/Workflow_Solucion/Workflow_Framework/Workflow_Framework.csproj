@@ -42,7 +42,6 @@
   <ItemGroup>
     <Compile Include="Control\Importacion\CL_Mapeo.cs" />
     <Compile Include="Control\Importacion\Registro.cs" />
-    <Compile Include="Control\Importacion\CL_Importacion.cs" />
     <Compile Include="Control\Importacion\CL_ImportacionMasiva.cs" />
     <Compile Include="Control\Importacion\CL_Layout.cs" />
     <Compile Include="Control\Importacion\CL_Layout_Campos.cs" />

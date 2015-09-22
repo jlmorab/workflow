@@ -9,14 +9,28 @@ namespace Workflow.Framework.Control.Importacion
 {
     class CL_Mapeo
     {
-        private int intLayout;
+        private int intIdLayout;
         private DataTable dtMapeo;
 
         internal dbInterface db;
 
         #region Constructor
 
-        public CL_Mapeo(dbInterface DB) { }
+        public CL_Mapeo(dbInterface DB) 
+        { 
+            db = DB; 
+            
+            // Inicializa variables
+            intIdLayout = -1;
+        }
+
+        public CL_Mapeo(int IdLayout, dbInterface DB) 
+        { 
+            db = DB; 
+
+            // Inicializa variables
+            this.IdLayout = IdLayout;
+        }
 
         #endregion
 
@@ -24,12 +38,12 @@ namespace Workflow.Framework.Control.Importacion
 
         public int IdLayout 
         {
-            get { return intLayout; }
+            get { return intIdLayout; }
             set 
             { 
-                intLayout = value;
+                intIdLayout = value;
 
-                ObtenerMapeo(intLayout);
+                ObtenerMapeo(intIdLayout);
             }
         }
 
@@ -56,7 +70,7 @@ namespace Workflow.Framework.Control.Importacion
             {
                 db.Connection_Check();
 
-                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[1];
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[2];
                 for (int i = 0; i < 2; i++)
                 {
                     parametros[i] = new System.Data.OleDb.OleDbParameter();

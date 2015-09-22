@@ -20,7 +20,7 @@ namespace Workflow.Framework.Control.Importacion
         private string strNombre;
         //-------------------------------
         private int intMetodoValidacion;
-        private int intCampoReferencia;
+        private int intColumnaReferencia;
         private int intCaracterInicial;
         private int intCaracterFinal;
         private int intTipoCampo;
@@ -37,7 +37,23 @@ namespace Workflow.Framework.Control.Importacion
 
         #region Constructor
 
-        public CL_Layout_Campos(dbInterface DB) { }
+        public CL_Layout_Campos(dbInterface DB) 
+        {
+            db = DB;
+
+            // Incializa variables
+            strNombre = string.Empty;
+            intTipoCampo = -1;
+            strNombreCampoReferencia = string.Empty;
+            blnExigirCoincidenciaNombre = false;
+            intColumnaReferencia = -1;
+            lngFilaReferencia = -1;
+            intCaracterInicial = -1;
+            intCaracterFinal = -1;
+            blnValidar = false;
+            intMetodoValidacion = -1;
+            strParametrosValidacion = string.Empty;
+        }
 
         #endregion
 
@@ -92,8 +108,8 @@ namespace Workflow.Framework.Control.Importacion
 
         public int ColumnaReferencia
         {
-            get { return intCampoReferencia; }
-            set { intCampoReferencia = value; }
+            get { return intColumnaReferencia; }
+            set { intColumnaReferencia = value; }
         }
 
         public long FilaReferencia
@@ -164,7 +180,7 @@ namespace Workflow.Framework.Control.Importacion
 
                 db.Connection_Check();
 
-                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[1];
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[2];
                 for (int i = 0; i < 2; i++)
                 {
                     parametros[i] = new System.Data.OleDb.OleDbParameter();
@@ -178,7 +194,7 @@ namespace Workflow.Framework.Control.Importacion
                 parametros[1].OleDbType = System.Data.OleDb.OleDbType.SmallInt;
                 parametros[1].Value = Status;
 
-                dt = db.GetTable("SEL_TIPO_DATO", parametros);
+                dt = db.GetTable("SEL_TIPO_CAMPO", parametros);
 
                 // Asignación de valores obtenidos
                 foreach (DataRow row in dt.Rows)
