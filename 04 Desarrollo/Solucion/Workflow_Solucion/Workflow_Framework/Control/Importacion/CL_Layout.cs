@@ -32,6 +32,8 @@ namespace Workflow.Framework.Control.Importacion
         private int intColumnaInicial;
         private int intFilaInicial;
         //-------------------------------
+        private bool blnPrimerRegistroEncabezados;
+        //-------------------------------
 
         internal dbInterface db;
 
@@ -56,6 +58,7 @@ namespace Workflow.Framework.Control.Importacion
             strTablaDestino = string.Empty;
             strSeparador = string.Empty;
             strObservaciones = string.Empty;
+            blnPrimerRegistroEncabezados = false;
         }
 
         public CL_Layout(int IdNegocio, int IdLayout, dbInterface DB) 
@@ -75,6 +78,7 @@ namespace Workflow.Framework.Control.Importacion
             strTablaDestino = string.Empty;
             strSeparador = string.Empty;
             strObservaciones = string.Empty;
+            blnPrimerRegistroEncabezados = false;
 
             intIdNegocio = IdNegocio;
             intIdLayout = IdLayout;
@@ -170,6 +174,18 @@ namespace Workflow.Framework.Control.Importacion
         {
             get { return intFilaInicial; }
             set { intFilaInicial = value; }
+        }
+
+        public DataTable Mapeo
+        {
+            get { return dtMapeo; }
+            set { dtMapeo = value; }
+        }
+
+        public bool PrimerRegistroEncabezados
+        {
+            get { return blnPrimerRegistroEncabezados; }
+            set { blnPrimerRegistroEncabezados = value; }
         }
 
         #endregion
