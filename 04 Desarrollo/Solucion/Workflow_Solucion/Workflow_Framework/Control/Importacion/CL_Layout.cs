@@ -239,6 +239,7 @@ namespace Workflow.Framework.Control.Importacion
                         strHoja = row["LAY_HOJ"].ToString();
                     intColumnaInicial = int.Parse(row["LAY_CIN"].ToString());
                     intFilaInicial = int.Parse(row["LAY_FIN"].ToString());
+                    blnPrimerRegistroEncabezados = ((row["LAY_PRN"].ToString()=="1") ? true : false);
                     strTablaDestino = row["LAY_TDE"].ToString();
                     if (row["LAY_SEP"] != DBNull.Value)
                         strSeparador = row["LAY_SEP"].ToString();

@@ -55,6 +55,14 @@ namespace Workflow.Framework.Control.Importacion
                 this.layout = loadLayout;
                 strNegocio = this.layout.Negocio;
                 strLayout = this.layout.Nombre;
+
+                CargarArchivo();
+
+                dteTermino = DateTime.Now;
+
+                //GuardarDatosEnBD()
+
+                //File.Delete(archivo.Ruta);
             }
         }
 
@@ -132,7 +140,19 @@ namespace Workflow.Framework.Control.Importacion
 
         public void CargarArchivo()
         {
-            
+            switch (this.archivo.Extension.ToLower())
+            {
+                case ".txt":
+                case ".csv":
+                    cargarArchivoTXT();
+                    break;
+                case ".xls": 
+                case ".xlsx":
+                    cargarArchivoXLS();
+                    break;
+                default:
+                    break;
+            }
         }
 
         #endregion
@@ -193,35 +213,45 @@ namespace Workflow.Framework.Control.Importacion
                                     {
                                         string valor = cadena[i - 1];
 
-                                        Registro registro = new Registro();
-
-                                        if(encabezados != null)
-                                        {
-                                            registro.NombreCampo = encabezados[i - 1];
-                                        }
-                                        registro.Campo = i;
-                                        registro.NumeroRegistro = reg - regOmitir;
-                                        registro.Valor = valor.Trim();
-                                        switch (validarRegistro(ref registro))
-                                        {
-                                            case Resultado.Correcto:
-                                                break;
-                                            case Resultado.Omitido:
-                                                break;
-                                            case Resultado.Erroneo:
-                                                break;
-                                            default:
-                                                break;
-                                        }
-
-                                        registros.Add(registro);
+                                        obtenerRegistro(
+                                                        ref registros, 
+                                                        i,                      // Columna
+                                                        reg - regOmitir,        // Fila
+                                                        valor.Trim()            // Valor
+                                                       );
                                     }
                                 }
                             }
                             // Ancho fijo
                             else
                             {
-
+                                // Obtener encabezados
+                                if (this.layout.PrimerRegistroEncabezados)
+                                {
+                                    this.encabezados = new string[this.layout.CamposDeLayout.Length];
+                                }
+                                
+                                foreach(CL_Layout_Campos campo in this.layout.CamposDeLayout)
+                                {
+                                    // Obtiene valor de campo
+                                    string valor = strLine.Substring(campo.CaracterInicial - 1, (campo.CaracterFinal - campo.CaracterInicial) + 1).Trim();
+                                    
+                                    // Obtener encabezados
+                                    if ((this.layout.PrimerRegistroEncabezados) && (reg == this.layout.FilaInicial))
+                                    {
+                                        encabezados[campo.ColumnaReferencia - 1] = valor;
+                                    }
+                                    // Asigna valor de registro
+                                    else
+                                    {
+                                        obtenerRegistro(
+                                                        ref registros,
+                                                        campo.ColumnaReferencia,    // Columna
+                                                        reg - regOmitir,            // Fila
+                                                        valor.Trim()                // Valor
+                                                       );
+                                    }
+                                }
                             }
                         }
                     }
@@ -233,6 +263,38 @@ namespace Workflow.Framework.Control.Importacion
             }
         }
 
+        private void obtenerRegistro(ref ArrayList contenedor,int columna, long fila, string valor)
+        {
+            Registro registro = new Registro();
+
+            if (encabezados != null)                    // Encabezado
+            {
+                if ((encabezados[columna - 1] != "") && (encabezados[columna - 1] != string.Empty))
+                {
+                    registro.NombreCampo = encabezados[columna - 1];
+                }
+            }
+            registro.Campo = columna;                   // Columna
+            registro.NumeroRegistro = fila;             // Fila
+            registro.Valor = valor.Trim();              // Valor
+            switch (validarRegistro(ref registro))      // Resultado de validación
+            {
+                case Resultado.Correcto:
+                    registro.Correcto = true;
+                    break;
+                case Resultado.Omitido:
+                    registro.Omitido = true;
+                    break;
+                case Resultado.Erroneo:
+                    registro.Erroneo = true;
+                    break;
+                default:
+                    break;
+            }
+
+            contenedor.Add(registro);
+        }
+
         private Resultado validarRegistro(ref Registro registro)
         {
             bool omitir = false;
@@ -241,9 +303,25 @@ namespace Workflow.Framework.Control.Importacion
             try
             {
                 // Validacion general
-                
+                foreach (CL_Layout_Campos campo in layout.CamposDeLayout)
+                {
+                    if (campo.ColumnaReferencia == registro.Campo)
+                    {
+                        if (campo.ExigirCoincidenciaNombre)
+                        {
+                            if (registro.NombreCampo != campo.NombreCampoReferencia)
+                            {
+                                error = true;
+                                registro.Observaciones += ((registro.Observaciones == string.Empty) ? "" : "|") +
+                                                          "C" + registro.Campo + ": Nombre de campo difiere del establecido, se esperaba '" + campo.NombreCampoReferencia + "'";
+                            }
+                        }
+                        break;
+                    }
+                }
 
                 // Validacion particular
+                // Modulo de validaciones (por definir)
 
                 // Devuelve resultado
                 if (error)
@@ -265,7 +343,7 @@ namespace Workflow.Framework.Control.Importacion
             catch (Exception Error)
             {
                 registro.Observaciones += ((registro.Observaciones == string.Empty) ? "" : "|") +
-                                          Error.Message;
+                                          "C" + registro.Campo + ": " + Error.Message;
                 return Resultado.Erroneo;
             }
         }

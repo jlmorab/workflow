@@ -38,12 +38,15 @@ namespace ImportacionMasiva.Pages
 
                 int i = 0;
 
+                string nombreOriginal = arcTarget.Nombre;
+
                 // Comprueba existencia en servidor
                 while(File.Exists(arcTarget.Ruta))
                 {
                     // Obtiene nombre de archivo consecutivo
                     i++;
-                    arcTarget.Nombre = arcTarget.Nombre + "(" + i + ")";
+                    arcTarget.Nombre = nombreOriginal + "(" + i + ")";
+                    
                 }
 
                 // Carga archivo en servidor
