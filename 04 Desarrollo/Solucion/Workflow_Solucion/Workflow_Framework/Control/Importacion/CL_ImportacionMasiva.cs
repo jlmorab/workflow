@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Data;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace Workflow.Framework.Control.Importacion
         dbInterface db = new dbInterface();
 
         //----------------------------
+        private DataTable resultados;
         private INF_Archive archivo;
         private CL_Layout layout;
         private string[] encabezados;
@@ -27,6 +29,7 @@ namespace Workflow.Framework.Control.Importacion
         private DateTime dteInicio;
         private Nullable<DateTime> dteTermino;
         //----------------------------
+        private long lngRegistrosProcesados;
         private long lngCorrectos;
         private long lngOmitidos;
         private long lngErroneos;
@@ -56,11 +59,24 @@ namespace Workflow.Framework.Control.Importacion
                 strNegocio = this.layout.Negocio;
                 strLayout = this.layout.Nombre;
 
+                // Prepara contenedor de resultados
+                this.resultados = new DataTable();
+                
+                this.resultados.Columns.Add("NUM_REGISTRO", Type.GetType("System.Int64"));
+                this.resultados.Columns.Add("RES_ROK", Type.GetType("System.Boolean"));
+                this.resultados.Columns.Add("RES_ROM", Type.GetType("System.Boolean"));
+                this.resultados.Columns.Add("RES_RER", Type.GetType("System.Boolean"));
+                this.resultados.Columns.Add("OBSERVACIONES", Type.GetType("System.String"));
+
+                // Carga archivo
                 CargarArchivo();
 
                 dteTermino = DateTime.Now;
 
-                //GuardarDatosEnBD()
+                // Registra en base de datos
+                registrarDatosEnBD();
+
+                // Transfiere a tabla correspondiente
 
                 //File.Delete(archivo.Ruta);
             }
@@ -293,6 +309,8 @@ namespace Workflow.Framework.Control.Importacion
             }
 
             contenedor.Add(registro);
+
+            evaluarResultado(registro);
         }
 
         private Resultado validarRegistro(ref Registro registro)
@@ -307,6 +325,8 @@ namespace Workflow.Framework.Control.Importacion
                 {
                     if (campo.ColumnaReferencia == registro.Campo)
                     {
+                        // ERRORES
+                        // Exigir coincidencia de nombre del campo (Archivo VS Configuracion)
                         if (campo.ExigirCoincidenciaNombre)
                         {
                             if (registro.NombreCampo != campo.NombreCampoReferencia)
@@ -316,12 +336,14 @@ namespace Workflow.Framework.Control.Importacion
                                                           "C" + registro.Campo + ": Nombre de campo difiere del establecido, se esperaba '" + campo.NombreCampoReferencia + "'";
                             }
                         }
+                        // OMISIONES
                         break;
                     }
                 }
 
                 // Validacion particular
                 // Modulo de validaciones (por definir)
+                // Validaciones (ref omitir, ref error);
 
                 // Devuelve resultado
                 if (error)
@@ -346,6 +368,59 @@ namespace Workflow.Framework.Control.Importacion
                                           "C" + registro.Campo + ": " + Error.Message;
                 return Resultado.Erroneo;
             }
+        }
+
+        private void evaluarResultado(Registro registro)
+        {
+            try
+            {
+                // Comprueba existencia de registro
+                DataRow[] rowFind = resultados.Select("NUM_REGISTRO = " + registro.NumeroRegistro);
+
+                if ((rowFind != null) && (rowFind.Length > 0))
+                {
+                    foreach (DataRow row in rowFind)
+                    {
+                        // Actualiza registro
+                        if (registro.Correcto)
+                            row["RES_ROK"] = true;
+                        if (registro.Omitido)
+                            row["RES_ROM"] = true;
+                        if (registro.Erroneo)
+                            row["RES_RER"] = true;
+                        if ((registro.Observaciones != string.Empty) && (registro.Observaciones != ""))
+                            row["OBSERVACIONES"] = ((row["OBSERVACIONES"].ToString() != "") ? "|" : "") +
+                                                   registro.Observaciones;
+                    }
+                }
+                else
+                {
+                    // Crea registro
+                    DataRow rowNew = resultados.NewRow();
+
+                    rowNew["NUM_REGISTRO"] = registro.NumeroRegistro;
+                    if (registro.Correcto)
+                        rowNew["RES_ROK"] = true;
+                    if (registro.Omitido)
+                        rowNew["RES_ROM"] = true;
+                    if (registro.Erroneo)
+                        rowNew["RES_RER"] = true;
+                    if ((registro.Observaciones != string.Empty) && (registro.Observaciones != ""))
+                        rowNew["OBSERVACIONES"] = ((rowNew["OBSERVACIONES"].ToString() != "") ? "|" : "") +
+                                                  registro.Observaciones;
+
+                    resultados.Rows.Add(rowNew);
+                }
+            }
+            catch (Exception Error)
+            {
+                string strMsgError = Error.Message;
+            }
+        }
+
+        private void registrarDatosEnDB()
+        {
+
         }
 
         #endregion
