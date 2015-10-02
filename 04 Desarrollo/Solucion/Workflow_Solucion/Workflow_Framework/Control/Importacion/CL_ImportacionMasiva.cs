@@ -23,12 +23,17 @@ namespace Workflow.Framework.Control.Importacion
         private string[] encabezados;
         //----------------------------
         private string strObservaciones;
+        private string strUsuario;
         private string strNegocio;
         private string strLayout;
         //----------------------------
         private DateTime dteInicio;
         private Nullable<DateTime> dteTermino;
         //----------------------------
+        private int intIdLayout;
+        private int intIdNegocio;
+        //----------------------------
+        private long lngIdBitacora;
         private long lngRegistrosProcesados;
         private long lngCorrectos;
         private long lngOmitidos;
@@ -39,15 +44,19 @@ namespace Workflow.Framework.Control.Importacion
 
         #region Constructor
 
-        public CL_ImportacionMasiva(int IdNegocio, int IdLayout, INF_Archive Archivo)
+        public CL_ImportacionMasiva(int IdNegocio, int IdLayout, INF_Archive Archivo, string Usuario = "SYS")
         {
             // Inicializa variables
             archivo = Archivo;
+            strUsuario = Usuario;
+            intIdNegocio = IdNegocio;
+            intIdLayout = IdLayout;
             dteInicio = DateTime.Now;
             dteTermino = null;
             lngCorrectos = 0;
             lngOmitidos = 0;
             lngErroneos = 0;
+            strObservaciones = string.Empty;
             encabezados = null;
             
             if(cnf.Estatus == Configuracion.Status.Correcto)
@@ -76,9 +85,7 @@ namespace Workflow.Framework.Control.Importacion
                 // Registra en base de datos
                 registrarDatosEnBD();
 
-                // Transfiere a tabla correspondiente
-
-                //File.Delete(archivo.Ruta);
+                File.Delete(archivo.Ruta);
             }
         }
 
@@ -111,6 +118,12 @@ namespace Workflow.Framework.Control.Importacion
                 return dteTermino;
             }
             set { dteTermino = value; }
+        }
+
+        public long IdBitacora
+        {
+            get { return lngIdBitacora; }
+            set { lngIdBitacora = value; }
         }
 
         public long RegistrosCorrectos
@@ -381,13 +394,23 @@ namespace Workflow.Framework.Control.Importacion
                 {
                     foreach (DataRow row in rowFind)
                     {
+                        bool omitir = bool.Parse(row["RES_ROM"].ToString());
+                        bool error = bool.Parse(row["RES_RER"].ToString());
+                        
                         // Actualiza registro
-                        if (registro.Correcto)
+                        if ((registro.Correcto) && (!omitir && !error))
                             row["RES_ROK"] = true;
-                        if (registro.Omitido)
+                        if ((registro.Omitido) && (!error))
+                        {
                             row["RES_ROM"] = true;
+                            row["RES_ROK"] = false;
+                        }
                         if (registro.Erroneo)
+                        {
+                            row["RES_ROK"] = false;
+                            row["RES_ROM"] = false;
                             row["RES_RER"] = true;
+                        }
                         if ((registro.Observaciones != string.Empty) && (registro.Observaciones != ""))
                             row["OBSERVACIONES"] = ((row["OBSERVACIONES"].ToString() != "") ? "|" : "") +
                                                    registro.Observaciones;
@@ -418,9 +441,230 @@ namespace Workflow.Framework.Control.Importacion
             }
         }
 
-        private void registrarDatosEnDB()
+        private void registrarDatosEnBD()
         {
+            // Crea registro inicial en bitácora de importación
+            registrarBitacora();
 
+            if (this.lngIdBitacora != 0)
+            {
+                // Ingresa registros en base de datos
+                foreach (Registro registro in this.registrosCargados)
+                {
+                    registraCampoEnBD(registro);
+                }
+
+                // Transfiere a tabla correspondiente
+                transferirATabla(true, true, false);
+                
+                // Actualiza bitácora de importación con resultados obtenidos
+                actualizarBitacora();
+            }
+        }
+
+        private void registrarBitacora()
+        {
+            try
+            {
+                DataTable dt;
+                
+                db.Connection_Check();
+
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    parametros[i] = new System.Data.OleDb.OleDbParameter();
+                }
+
+                parametros[0].ParameterName = "P_ID_LAYOUT";
+                parametros[0].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[0].Value = this.intIdLayout;
+
+                parametros[1].ParameterName = "P_USER";
+                parametros[1].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[1].Value = strUsuario;
+
+                parametros[2].ParameterName = "P_ARCHIVO";
+                parametros[2].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[2].Value = archivo.Nombre;
+
+                parametros[3].ParameterName = "P_EXTENSION";
+                parametros[3].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[3].Value = archivo.Extension;
+
+                parametros[4].ParameterName = "P_OBS";
+                parametros[4].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[4].Value = strObservaciones;
+
+                dt = db.GetTable("INS_BITACORA_IMPORTACION", parametros);
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    this.lngIdBitacora = long.Parse(row["BII_CVE"].ToString());
+                }
+            }
+            catch (Exception Error)
+            {
+                string strMsgError = Error.Message;
+            }
+        }
+
+        private void actualizarBitacora()
+        {
+            try
+            {
+                object rowQuery;
+                
+                // Obtiene valores totales de importación
+                // Registros correctos
+                rowQuery = resultados.Compute("Count(RES_ROK)","RES_ROK = true");
+                this.lngCorrectos = long.Parse(rowQuery.ToString());
+
+                // Registros omitidos
+                rowQuery = resultados.Compute("Count(RES_ROM)", "RES_ROM = true");
+                this.lngOmitidos = long.Parse(rowQuery.ToString());
+
+                // Registros erróneos
+                rowQuery = resultados.Compute("Count(RES_RER)", "RES_RER = true");
+                this.lngErroneos = long.Parse(rowQuery.ToString());
+                
+                // Actualiza en base de datos
+                db.Connection_Check();
+
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    parametros[i] = new System.Data.OleDb.OleDbParameter();
+                }
+
+                parametros[0].ParameterName = "P_ID_BITACORA";
+                parametros[0].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[0].Value = this.lngIdBitacora;
+
+                parametros[1].ParameterName = "P_REG_OK";
+                parametros[1].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[1].Value = this.lngCorrectos;
+
+                parametros[2].ParameterName = "P_REG_OM";
+                parametros[2].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[2].Value = this.lngOmitidos;
+
+                parametros[3].ParameterName = "P_REG_ER";
+                parametros[3].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[3].Value = this.lngErroneos;
+
+                parametros[4].ParameterName = "P_OBS";
+                parametros[4].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[4].Value = this.strObservaciones;
+
+                db.ExecutaProcedureNonQuery("UPD_BITACORA_IMPORTACION", parametros);
+            }
+            catch (Exception Error)
+            {
+                string strMsgError = Error.Message;
+            }
+        }
+
+        private void registraCampoEnBD(Registro registro)
+        {
+            try
+            {
+                // Actualiza en base de datos
+                db.Connection_Check();
+
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[9];
+                for (int i = 0; i < 9; i++)
+                {
+                    parametros[i] = new System.Data.OleDb.OleDbParameter();
+                }
+
+                parametros[0].ParameterName = "P_ID_BITACORA";
+                parametros[0].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[0].Value = this.lngIdBitacora;
+
+                parametros[1].ParameterName = "P_NOM_CAMPO";
+                parametros[1].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[1].Value = registro.NombreCampo;
+
+                parametros[2].ParameterName = "P_NUM_CAMPO";
+                parametros[2].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[2].Value = registro.Campo;
+
+                parametros[3].ParameterName = "P_NUM_REGISTRO";
+                parametros[3].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[3].Value = registro.NumeroRegistro;
+
+                parametros[4].ParameterName = "P_VALOR";
+                parametros[4].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[4].Value = registro.Valor;
+
+                parametros[5].ParameterName = "P_REG_OK";
+                parametros[5].OleDbType = System.Data.OleDb.OleDbType.SmallInt;
+                parametros[5].Value = ((registro.Correcto) ? 1 : 0);
+
+                parametros[6].ParameterName = "P_REG_OM";
+                parametros[6].OleDbType = System.Data.OleDb.OleDbType.SmallInt;
+                parametros[6].Value = ((registro.Omitido) ? 1 : 0);
+
+                parametros[7].ParameterName = "P_REG_ER";
+                parametros[7].OleDbType = System.Data.OleDb.OleDbType.SmallInt;
+                parametros[7].Value = ((registro.Erroneo) ? 1 : 0);
+
+                parametros[8].ParameterName = "P_OBS";
+                parametros[8].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[8].Value = registro.Observaciones;
+
+                db.ExecutaProcedureNonQuery("INS_REGISTRO_IMPORTACION", parametros);
+            }
+            catch (Exception Error)
+            {
+                string strMsgError = Error.Message;
+            }
+        }
+
+        private void transferirATabla(bool Correctos, bool Omitidos, bool Erroneos)
+        {
+            try
+            {
+                // Estructurar datos obtenidos en forma de tabla y los inserta en la tabla deseada
+                db.Connection_Check();
+
+                System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[6];
+                for (int i = 0; i < 3; i++)
+                {
+                    parametros[i] = new System.Data.OleDb.OleDbParameter();
+                }
+
+                parametros[0].ParameterName = "P_ID_BITACORA";
+                parametros[0].OleDbType = System.Data.OleDb.OleDbType.BigInt;
+                parametros[0].Value = this.lngIdBitacora;
+
+                parametros[1].ParameterName = "P_ID_LAYOUT";
+                parametros[1].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[1].Value = this.intIdLayout;
+
+                parametros[2].ParameterName = "P_TABLA_DESTINO";
+                parametros[2].OleDbType = System.Data.OleDb.OleDbType.VarChar;
+                parametros[2].Value = this.layout.TablaDestino;
+
+                parametros[3].ParameterName = "P_REG_OK";
+                parametros[3].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[3].Value = ((Correctos) ? 1 : 0);
+
+                parametros[4].ParameterName = "P_REG_OM";
+                parametros[4].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[4].Value = ((Omitidos) ? 1 : 0);
+
+                parametros[5].ParameterName = "P_REG_ER";
+                parametros[5].OleDbType = System.Data.OleDb.OleDbType.Integer;
+                parametros[5].Value = ((Erroneos) ? 1 : 0);
+
+                db.ExecutaProcedureNonQuery("INS_TABLA_IMPORTACION", parametros);
+            }
+            catch (Exception Error)
+            {
+                string strMsgError = Error.Message;
+            }
         }
 
         #endregion
