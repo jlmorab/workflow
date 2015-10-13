@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -51,13 +51,27 @@ namespace ImportacionMasiva.Pages
 
                 // Carga archivo en servidor
                 try
-                {
+                {   
                     getArchivo.PostedFile.SaveAs(arcTarget.Ruta);
 
                     int IdNegocio = 1;
-                    int IdLayout = 0;
-
+                    int IdLayout = 1;
+                    
                     CL_ImportacionMasiva importar = new CL_ImportacionMasiva(IdNegocio, IdLayout, arcTarget);
+
+                    if(importar.ExisteArchivoDesviaciones)
+                    {
+                        string strArchivo = importar.ArchivoDesviaciones.NombreCompleto;
+
+                        Response.Clear();
+                        Response.AddHeader("content-disposition", "attachment;filename=" + strArchivo);
+                        Response.ContentType = "application/vnd.csv";
+                        Response.Charset = "UTF-8";
+                        Response.ContentEncoding = System.Text.Encoding.UTF8;
+                        byte[] MyData = (byte[])System.IO.File.ReadAllBytes(Server.MapPath("~/bin/files/") + strArchivo);
+                        Response.BinaryWrite(MyData);
+                        Response.End();
+                    }
 
                     lblUploadResult.Text = "Archivo cargado en: " + arcTarget.Ruta;
                 }

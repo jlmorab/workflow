@@ -143,6 +143,12 @@ namespace Workflow.Framework.Infra
             set { strProceso = value; }
         }
 
+        public string Separador
+        {
+            get { return strSeparador; }
+            set { strSeparador = value; }
+        }
+
         #endregion
 
         #region Listas
@@ -156,6 +162,44 @@ namespace Workflow.Framework.Infra
             if ((Nombre != null) && (Nombre.Trim() != ""))
             {
                 ObtencionPorSeparador(Nombre, Separador, Prefijo, Sufijo);
+            }
+        }
+
+        public void CrearArchivoTexto(bool Consecutivo = false, bool Sobreescribir = false)
+        {
+            if (this.Ruta != string.Empty)
+            {
+                if (File.Exists(this.strRuta))
+                {
+                    // Obtiene consecutivo en caso de requerirse
+                    if (Consecutivo)
+                    {
+                        this.strNombreOriginal = this.strNombre;
+                        string nombre = this.strNombreOriginal;
+                        this.strNombre = string.Empty;
+                        int i = 0;
+
+                        do
+                        {
+                            i += 1;
+                            // Comprueba nombre de archivo con un consecutivo
+                            if (!File.Exists(Path.Combine(this.SoloRuta, nombre + "(" + i + ")" + this.strExtension)))
+                            {
+                                this.strNombre = nombre + "(" + i + ")" + this.strExtension;
+                            }
+                        } while (this.strNombre == "");
+                        
+                    }
+                    else
+                    {
+                        File.Delete(this.strRuta);
+                    }
+                }
+
+                using (FileStream pfile = File.Create(this.strRuta))
+                {
+                    // Archivo creado
+                }
             }
         }
 
@@ -177,6 +221,12 @@ namespace Workflow.Framework.Infra
 
             // Ruta
             strRuta = Ruta;
+
+            if (Prefijo != -1)
+                ObtenerPrefijos(strNombre, Prefijo, Separador);
+
+            if (Sufijo != -1)
+                ObtenerSufijo(strNombre, Prefijo, Separador);
         }
 
         private void ObtenerPrefijos(string Archivo, int Caracteres, string Separador = "_")

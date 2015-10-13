@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using Workflow_Data;
 using Workflow.Framework.Infra;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Workflow.Framework.Control.Importacion
 {
@@ -19,7 +22,9 @@ namespace Workflow.Framework.Control.Importacion
         //----------------------------
         private DataTable resultados;
         private INF_Archive archivo;
+        private INF_Archive archivoDesviaciones;
         private CL_Layout layout;
+        private Registro[] registrosCargados;
         private string[] encabezados;
         //----------------------------
         private string strObservaciones;
@@ -34,12 +39,11 @@ namespace Workflow.Framework.Control.Importacion
         private int intIdNegocio;
         //----------------------------
         private long lngIdBitacora;
-        private long lngRegistrosProcesados;
         private long lngCorrectos;
         private long lngOmitidos;
         private long lngErroneos;
         //----------------------------
-        private Registro[] registrosCargados;
+        private bool blnArchivoDesviaciones;
         //----------------------------
 
         #region Constructor
@@ -152,6 +156,22 @@ namespace Workflow.Framework.Control.Importacion
             set { strObservaciones = value; }
         }
 
+        public bool ExisteArchivoDesviaciones
+        {
+            get { return blnArchivoDesviaciones; }
+            set { blnArchivoDesviaciones = value; }
+        }
+
+        public INF_Archive ArchivoOrigen
+        {
+            get { return archivo; }
+        }
+
+        public INF_Archive ArchivoDesviaciones
+        {
+            get { return archivoDesviaciones; }
+        }
+
         #endregion
 
         #region Listas
@@ -194,6 +214,129 @@ namespace Workflow.Framework.Control.Importacion
             if (File.Exists(this.archivo.Ruta))
             {
                 ArrayList registros = new ArrayList();
+                long regOmitir = this.layout.FilaInicial -
+                                 ((this.layout.PrimerRegistroEncabezados) ? 0 : -1);
+
+                int colOmitir = this.layout.ColumnaInicial - 1;
+
+                // Abre archivo
+                Excel.Application excel = new Excel.Application();
+                Excel.Workbook libro = null;
+                Excel.Worksheet hoja = null;
+                Excel.Range rango = null;
+                
+                try
+                {
+                    libro = (Excel.Workbook)excel.Workbooks.Open(archivo.Ruta);
+                    try
+                    {
+                        hoja = (Excel.Worksheet)libro.Worksheets[this.layout.Hoja];
+
+                        try
+                        {
+                            int columna = this.layout.ColumnaInicial;
+                            long fila = this.layout.FilaInicial;
+
+                            // Datos en columna inicial
+                            int colDatos = (int)excel.WorksheetFunction.CountA(hoja.Rows[fila]);
+                            if (columna > 1)
+                            {
+                                // Datos antes de Columna Inicial
+                                rango = hoja.Range[hoja.Cells[fila, 1], hoja.Cells[fila, columna - 1]];
+                                colDatos -= (int)excel.WorksheetFunction.CountA(rango);
+                            }
+                            if (this.layout.PrimerRegistroEncabezados)
+                                this.encabezados = new string[colDatos];
+                            // Datos en fila inicial
+                            long filDatos = (long)excel.WorksheetFunction.CountA(hoja.Columns[columna]);
+                            if (fila > 1)
+                            {
+                                // Datos antes de Fila Inicial
+                                rango = hoja.Range[hoja.Cells[1, columna], hoja.Cells[fila - 1, columna]];
+                                filDatos -= (long)excel.WorksheetFunction.CountA(rango);
+                            }
+
+                            // Obtiene rango usado del archivo
+                            string[,] rangoUsado = new string[2, 2];
+                            string[] strRef = hoja.UsedRange.Address.ToString().Split(':');
+                            rangoUsado[0, 0] = hoja.Range[strRef[0]].Row.ToString();     // Fila Inicial
+                            rangoUsado[0, 1] = hoja.Range[strRef[0]].Column.ToString();  // Columna Inicial
+                            rangoUsado[1, 0] = hoja.Range[strRef[1]].Row.ToString();     // Fila Final
+                            rangoUsado[1, 1] = hoja.Range[strRef[1]].Column.ToString();  // Columna Final
+
+                            // Obtiene valores de cada fila
+                            for (long i = fila; i <= int.Parse(rangoUsado[1, 0]); i++)
+                            {
+                                rango = hoja.Range[hoja.Cells[i, columna], hoja.Cells[i, (columna + colDatos) - 1]];
+                                if (excel.WorksheetFunction.CountA(rango) != 0)
+                                {
+                                    int datProcesados = 0;
+                                    for (int j = columna; j <= (columna + colDatos) - 1; j++)
+                                    {
+                                        if ((this.layout.PrimerRegistroEncabezados) && (fila == i))
+                                        {
+                                            // Obtiene encabezado
+                                            if (hoja.Cells[fila, j].Value != null)
+                                            {
+                                                encabezados[datProcesados] = hoja.Cells[fila, j].Value.ToString().Trim();
+                                                datProcesados++;
+                                            }
+                                        }
+                                        // Asigna valor de registro
+                                        else
+                                        {
+                                            string valor = "";
+
+                                            if (hoja.Cells[i, j].Value != null)
+                                            {
+                                                valor = hoja.Cells[i, j].Value.ToString().Trim();
+                                            }
+
+                                            obtenerRegistro(
+                                                            ref registros,
+                                                            j - colOmitir,              // Columna
+                                                            i - regOmitir,              // Fila
+                                                            valor.Trim()                // Valor
+                                                           );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception Error)
+                        {
+                            string msgMsgError = Error.Message;
+                            this.Observaciones = this.Observaciones +
+                                                 ((this.Observaciones == "") ? "" : "|") +
+                                                 "#Error - " + msgMsgError;
+                        }
+                    }
+                    catch (Exception Error)
+                    {
+                        string msgMsgError = Error.Message;
+                        this.Observaciones = this.Observaciones + 
+                                             ((this.Observaciones == "") ? "" : "|") +
+                                             "#Error - Hoja de origen de datos no fue encontrada. Se esperaba " + this.layout.Hoja;
+                    }
+
+                }
+                catch (Exception Error)
+                {
+                    string msgMsgError = Error.Message;
+                    this.Observaciones = this.Observaciones +
+                                         ((this.Observaciones == "") ? "" : "|") +
+                                         "#Error - " + msgMsgError;
+                }
+                finally
+                {
+                    try { libro.Close(); }
+                    catch (Exception){}
+                    
+                    rango = null;
+                    hoja = null;
+                    libro = null;
+                    excel = null;
+                }
 
                 // Cargar registros obtenidos
                 this.registrosCargados = new Registro[registros.Count];
@@ -346,7 +489,7 @@ namespace Workflow.Framework.Control.Importacion
                             {
                                 error = true;
                                 registro.Observaciones += ((registro.Observaciones == string.Empty) ? "" : "|") +
-                                                          "C" + registro.Campo + ": Nombre de campo difiere del establecido, se esperaba '" + campo.NombreCampoReferencia + "'";
+                                                          "C" + registro.Campo + "[E]: Nombre de campo difiere del establecido; se esperaba '" + campo.NombreCampoReferencia + "'";
                             }
                         }
                         // OMISIONES
@@ -378,7 +521,7 @@ namespace Workflow.Framework.Control.Importacion
             catch (Exception Error)
             {
                 registro.Observaciones += ((registro.Observaciones == string.Empty) ? "" : "|") +
-                                          "C" + registro.Campo + ": " + Error.Message;
+                                          "C" + registro.Campo + "[E]: " + Error.Message.Replace(",",";");
                 return Resultado.Erroneo;
             }
         }
@@ -459,6 +602,8 @@ namespace Workflow.Framework.Control.Importacion
                 
                 // Actualiza bitácora de importación con resultados obtenidos
                 actualizarBitacora();
+
+                this.blnArchivoDesviaciones = GenerarArchivoOmitidos();
             }
         }
 
@@ -494,7 +639,14 @@ namespace Workflow.Framework.Control.Importacion
 
                 parametros[4].ParameterName = "P_OBS";
                 parametros[4].OleDbType = System.Data.OleDb.OleDbType.VarChar;
-                parametros[4].Value = strObservaciones;
+                if (this.strObservaciones.Length > 255)
+                {
+                    parametros[4].Value = strObservaciones.Substring(0, 254);
+                }
+                else
+                {
+                    parametros[4].Value = strObservaciones;
+                }
 
                 dt = db.GetTable("INS_BITACORA_IMPORTACION", parametros);
 
@@ -505,7 +657,10 @@ namespace Workflow.Framework.Control.Importacion
             }
             catch (Exception Error)
             {
-                string strMsgError = Error.Message;
+                string msgMsgError = Error.Message;
+                this.Observaciones = this.Observaciones +
+                                     ((this.Observaciones == "") ? "" : "|") +
+                                     "#Error - " + msgMsgError;
             }
         }
 
@@ -555,13 +710,23 @@ namespace Workflow.Framework.Control.Importacion
 
                 parametros[4].ParameterName = "P_OBS";
                 parametros[4].OleDbType = System.Data.OleDb.OleDbType.VarChar;
-                parametros[4].Value = this.strObservaciones;
+                if (this.strObservaciones.Length > 255)
+                {
+                    parametros[4].Value = strObservaciones.Substring(0, 254);
+                }
+                else
+                {
+                    parametros[4].Value = strObservaciones;
+                }
 
                 db.ExecutaProcedureNonQuery("UPD_BITACORA_IMPORTACION", parametros);
             }
             catch (Exception Error)
             {
-                string strMsgError = Error.Message;
+                string msgMsgError = Error.Message;
+                this.Observaciones = this.Observaciones +
+                                     ((this.Observaciones == "") ? "" : "|") +
+                                     "#Error - " + msgMsgError;
             }
         }
 
@@ -618,7 +783,10 @@ namespace Workflow.Framework.Control.Importacion
             }
             catch (Exception Error)
             {
-                string strMsgError = Error.Message;
+                string msgMsgError = Error.Message;
+                this.Observaciones = this.Observaciones +
+                                     ((this.Observaciones == "") ? "" : "|") +
+                                     "#Error - " + msgMsgError;
             }
         }
 
@@ -630,7 +798,7 @@ namespace Workflow.Framework.Control.Importacion
                 db.Connection_Check();
 
                 System.Data.OleDb.OleDbParameter[] parametros = new System.Data.OleDb.OleDbParameter[6];
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     parametros[i] = new System.Data.OleDb.OleDbParameter();
                 }
@@ -663,7 +831,84 @@ namespace Workflow.Framework.Control.Importacion
             }
             catch (Exception Error)
             {
+                string msgMsgError = Error.Message;
+                this.Observaciones = this.Observaciones +
+                                     ((this.Observaciones == "") ? "" : "|") +
+                                     "#Error - " + msgMsgError;
+            }
+        }
+
+        private bool GenerarArchivoOmitidos()
+        {
+            try
+            {
+                if ((this.lngOmitidos > 0) || (this.lngErroneos > 0))
+                {
+                    string strProceso = "ImportacionMasiva";
+                    string strFolder = Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).ToString().Replace("file:\\",""),
+                                                    "files");
+                    string strNombre = "ERR_" + this.strUsuario + "_" + strProceso + ".csv";
+                    string strRuta = Path.Combine(strFolder, strNombre);
+
+                    ComprobarRuta(strFolder);
+
+                    this.archivoDesviaciones = new INF_Archive(strRuta, 3);
+
+                    this.archivoDesviaciones.Separador = ",";
+                    this.archivoDesviaciones.Proceso = strProceso;
+
+                    this.archivoDesviaciones.CrearArchivoTexto(false, true);
+
+                    using (StreamWriter pfile = new StreamWriter(this.archivoDesviaciones.Ruta))
+                    {
+                        DataRow[] rowFind = this.resultados.Select("RES_ROM = true OR RES_RER = true","NUM_REGISTRO ASC");
+
+                        pfile.WriteLine("RENGLON,OBSERVACIONES");
+
+                        foreach (DataRow row in rowFind)
+                        {
+                            string strLine = row["NUM_REGISTRO"].ToString() +
+                                             this.archivoDesviaciones.Separador +
+                                             row["OBSERVACIONES"].ToString();
+
+                            pfile.WriteLine(strLine);
+                        }
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    // No se creo archivo
+                    return false;
+                }
+            }
+            catch (Exception Error)
+            {
                 string strMsgError = Error.Message;
+                return false;
+            }
+        }
+
+        private void ComprobarRuta(string Ruta)
+        {
+            string[] carpetas = Regex.Split(Ruta, "\\\\");
+            string rutaAcum = "";
+
+            // Comprueba cada carpeta de la ruta
+            foreach (string carpeta in carpetas)
+            {
+                // Si es el prompt no lo comprueba
+                if (!(carpeta.IndexOf(":") >= 0))
+                {
+                    // En caso de no existir, la crea
+                    if (!Directory.Exists(rutaAcum + "\\" + carpeta))
+                    {
+                        Directory.CreateDirectory(rutaAcum + "\\" + carpeta);
+                    }
+                }
+
+                rutaAcum += carpeta + ((carpeta.Equals(carpetas[carpetas.Length - 1])) ? "" : "\\");
             }
         }
 

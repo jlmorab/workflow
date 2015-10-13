@@ -77,7 +77,6 @@ namespace Workflow_Data
             {
                 this.lstEstatus = Status.Error;
             }
-            
         }
 
         #endregion

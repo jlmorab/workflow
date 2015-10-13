@@ -7,3 +7,4 @@ C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow
 C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\ImportacionMasiva\bin\Workflow_Framework.dll
 C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\ImportacionMasiva\bin\Workflow_Data.pdb
 C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\ImportacionMasiva\bin\Workflow_Framework.pdb
+C:\Users\gomezgr\Documents\Proyectos\C#\Workflow\04 Desarrollo\Solucion\Workflow_Solucion\ImportacionMasiva\bin\ImportacionMasiva.tlb
